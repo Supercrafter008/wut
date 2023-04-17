@@ -19,6 +19,7 @@ typedef struct MCPInstallInfo MCPInstallInfo;
 typedef struct MCPInstallProgress MCPInstallProgress;
 typedef struct MCPInstallTitleInfo MCPInstallTitleInfo;
 typedef struct MCPSysProdSettings MCPSysProdSettings;
+typedef struct MCPSystemVersion MCPSystemVersion;
 typedef struct MCPTitleListType MCPTitleListType;
 
 typedef enum MCPAppType
@@ -60,6 +61,13 @@ typedef enum MCPAppType
    MCP_APP_TYPE_AMIIBO_SETTINGS        = 0xD0000033,
 } MCPAppType;
 
+typedef enum MCPDeviceType
+{
+   MCP_DEVICE_TYPE_ODD                 = 2,
+   MCP_DEVICE_TYPE_MLC                 = 3,
+   MCP_DEVICE_TYPE_USB                 = 4,
+} MCPDeviceType;
+
 typedef enum MCPDeviceFlags
 {
    MCP_DEVICE_FLAG_UNK_1               = 0x1,
@@ -83,6 +91,14 @@ typedef enum MCPRegion
    MCP_REGION_KOREA                    = 0x20,
    MCP_REGION_TAIWAN                   = 0x40,
 } MCPRegion;
+
+typedef enum MCPCompatAVFile
+{
+   //! DMCU firmware
+   MCP_COMPAT_AV_FILE_DMCU  = 0x00,
+   //! Deinterlacer parameters
+   MCP_COMPAT_AV_FILE_DEINT = 0x01,
+} MCPCompatAVFile;
 
 struct WUT_PACKED MCPDevice
 {
@@ -165,6 +181,19 @@ WUT_CHECK_OFFSET(MCPSysProdSettings, 0x32, model_number);
 WUT_CHECK_OFFSET(MCPSysProdSettings, 0x42, version);
 WUT_CHECK_SIZE(MCPSysProdSettings, 0x46);
 
+struct MCPSystemVersion
+{
+   uint32_t major;
+   uint32_t minor;
+   uint32_t patch;
+   char region;
+};
+WUT_CHECK_OFFSET(MCPSystemVersion, 0x00, major);
+WUT_CHECK_OFFSET(MCPSystemVersion, 0x04, minor);
+WUT_CHECK_OFFSET(MCPSystemVersion, 0x08, patch);
+WUT_CHECK_OFFSET(MCPSystemVersion, 0x0C, region);
+WUT_CHECK_SIZE(MCPSystemVersion, 0x10);
+
 struct WUT_PACKED MCPTitleListType
 {
    uint64_t titleId;
@@ -213,6 +242,10 @@ MCP_GetOwnTitleInfo(int32_t handle,
 MCPError
 MCP_GetSysProdSettings(int32_t handle,
                        MCPSysProdSettings *settings);
+
+MCPError
+MCP_GetSystemVersion(int32_t handle,
+                     MCPSystemVersion *systemVersion);
 
 MCPError
 MCP_GetTitleId(int32_t handle,
@@ -276,6 +309,35 @@ MCP_TitleListByUniqueId(int32_t handle,
                         uint32_t titleListSizeBytes);
 
 MCPError
+MCP_TitleListByDevice(int32_t handle,
+                      const char *device,
+                      uint32_t *outTitleCount,
+                      MCPTitleListType *titleList,
+                      uint32_t titleListSizeBytes);
+
+MCPError
+MCP_TitleListByDeviceType(int32_t handle,
+                          MCPDeviceType deviceType,
+                          uint32_t *outTitleCount,
+                          MCPTitleListType *titleList,
+                          uint32_t titleListSizeBytes);
+MCPError
+MCP_TitleListByAppAndDevice(int32_t handle,
+                            MCPAppType appType,
+                            const char *device,
+                            uint32_t *outTitleCount,
+                            MCPTitleListType *titleList,
+                            uint32_t titleListSizeBytes);
+
+MCPError
+MCP_TitleListByAppAndDeviceType(int32_t handle,
+                                MCPAppType appType,
+                                MCPDeviceType deviceType,
+                                uint32_t *outTitleCount,
+                                MCPTitleListType *titleList,
+                                uint32_t titleListSizeBytes);
+
+MCPError
 MCP_TitleListByUniqueIdAndIndexedDeviceAndAppType(int32_t handle,
                                                   uint32_t uniqueId,
                                                   const char *indexedDevice,
@@ -286,9 +348,15 @@ MCP_TitleListByUniqueIdAndIndexedDeviceAndAppType(int32_t handle,
                                                   uint32_t titleListSizeBytes);
 
 MCPError
-MCP_UninstallTitleAsync(int handle,
+MCP_UninstallTitleAsync(int32_t handle,
                         const char *path,
                         MCPInstallTitleInfo *out);
+
+MCPError
+MCP_CompatLoadAVFile(int32_t handle,
+                     void *ptr,
+                     uint32_t *size,
+                     MCPCompatAVFile file);
 
 #ifdef __cplusplus
 }
