@@ -74,14 +74,6 @@ typedef enum MCPInstallTarget
    MCP_INSTALL_TARGET_USB              = 1,
 } MCPInstallTarget;
 
-typedef enum MCPDeviceType
-{
-   MCP_DEVICE_TYPE_DISC               = 2,
-   MCP_DEVICE_TYPE_NAND               = 3,
-   MCP_DEVICE_TYPE_USB                = 4,
-} MCPDeviceType;
-WUT_CHECK_SIZE(MCPDeviceType, 4);
-
 typedef enum MCPRegion
 {
    MCP_REGION_JAPAN                    = 0x01,
@@ -230,13 +222,6 @@ MCPError
 MCP_GetTitleInfo(int32_t handle,
                  uint64_t titleId,
                  MCPTitleListType *titleInfo);
-
-MCPError
-MCP_GetTitleInfoByTitleAndDeviceType(int32_t handle,
-                                 int32_t unused,
-                                 uint64_t titleId,
-                                 MCPDeviceType device,
-                                 MCPTitleListType *titleInfo);
 
 MCPError
 MCP_InstallSetTargetDevice(int handle,
